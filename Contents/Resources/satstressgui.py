@@ -280,7 +280,7 @@ class SatelliteCalculation(object):
         except:
             return default_value
 
-    #Constructs a satellite from a file if not all parameters are inputted.
+    #Constructs a satellite from a file if not all parameters are inputed.
     def get_satellite(self):
         if self.satellite_changed or not self.satellite:
             self.mk_satellite()
@@ -471,7 +471,6 @@ class SatelliteCalculation(object):
             raise LocalError('Grid parameter %s is not defined' % str(e), u'Grid Error')
         except Exception, e:
             raise LocalError(str(e), u'Grid Error')
-
     #Writes calculated love numbers to a file.
     def save_love(self, filename):
         f = open(filename, 'w') 
@@ -1034,7 +1033,7 @@ def add_radiobox2_to_sizer(parent, sz, parameter, description, choices):
     sz.Add(parameters[parameter], flag=wx.EXPAND|wx.ALL)
     return parameters
 
-#Adds given paramters as static text to the GUI.
+#Adds given parameters as static text to the GUI.
 def add_static_texts(parent, sz, parameters_d):
     sts = [ wx.StaticText(parent, label=d, style=wx.TE_PROCESS_ENTER) for p, d in parameters_d ]
     for st in sts:
@@ -1348,6 +1347,7 @@ class StressListPanel(SatPanel):
         sz.Add(ISTParams_sz)
         sz.AddSpacer(5)
         
+        #For Polar Wander
         self.parameters.update(add_checkboxes_to_sizer(self, sz, [ ('Polar Wander', 'Polar Wander') ]))
 
         Polargrid = wx.FlexGridSizer(rows=9, cols=3, hgap=3, vgap=5) #A GridSizer to hold the polar wander coordinates. -PS 2016
@@ -1383,6 +1383,7 @@ class StressListPanel(SatPanel):
         self.TidalLock = wx.CheckBox(self, wx.ID_ANY, style=wx.ALIGN_RIGHT, label=u'Assume tidally locked satellite')
         self.TidalLock.SetValue(True)
         self.Bind(wx.EVT_CHECKBOX, self.Lock_Body, self.TidalLock)
+        
         #Despinning could be implemented as a separate stress, but I did not have time to do this. -PS 2016
         self.DespinningBox = wx.CheckBox(self, wx.ID_ANY, style=wx.ALIGN_RIGHT, label=u'Despinning [hours]')
         self.Bind(wx.EVT_CHECKBOX, self.Despinning, self.DespinningBox)
@@ -1407,6 +1408,32 @@ class StressListPanel(SatPanel):
         sz.Add(wx.StaticText(self, label=u"   to combine it with other stresses."))
         sz.Add(wx.StaticText(self, label=u" *The stress map from Polar Wander appears to be correct,"))
         sz.Add(wx.StaticText(self, label=u"   but the principal stress vectors are rotated 180° for some reason."))
+
+        sz.AddSpacer(5)
+        #For Orbital Recession
+        self.parameters.update(add_checkboxes_to_sizer(self, sz,
+            [ ('Orbital Recession', 'Orbit Recession') ]))
+        OrbRec_sz = wx.BoxSizer(wx.VERTICAL)
+        initSemiMajor_sz = wx.BoxSizer(orient=wx.HORIZONTAL)
+        initSemiMajor_sz.AddSpacer(28) 
+        self.init_label = wx.StaticText(self,
+           label=u'Initial Position of Semi-Major Axis  ')
+        initSemiMajor_sz.Add(self.init_label, flag=wx.ALIGN_CENTER_VERTICAL)
+        initSemiMajor_sz.AddSpacer(16)
+        self.parameters.update(add_text_ctrls(self, initSemiMajor_sz,
+           [ ('initpos_arg', 'initpos_arg') ]))
+        OrbRec_sz.Add(initSemiMajor_sz)
+        OrbRec_sz.AddSpacer(5)
+        finSemiMajor_sz = wx.BoxSizer(orient=wx.HORIZONTAL)
+        finSemiMajor_sz.AddSpacer(28)
+        self.fin_label = wx.StaticText(self, label=u'Final Position of Semi-Major Axis  ')
+        finSemiMajor_sz.Add(self.fin_label, flag=wx.ALIGN_CENTER_VERTICAL)
+        finSemiMajor_sz.AddSpacer(20)
+        self.parameters.update(add_text_ctrls(self, finSemiMajor_sz,
+            [('finpos_arg', 'finpos_arg')]))
+        OrbRec_sz.Add(finSemiMajor_sz)
+        sz.Add(OrbRec_sz)
+        sz.AddSpacer(5)
 
         #UI addition for displaying program-generated Love numbers. -ND 2017 
         loveSizer = wx.BoxSizer(wx.VERTICAL)
@@ -1505,6 +1532,7 @@ class StressListPanel(SatPanel):
         self.disable_istparams()
         self.disable_obliq()
         self.disable_polar()
+        self.disable_orbitalrec()
 
     def updateLoveNumberDisplay(self, event):
         SatStressPanel.stp.on_set_diurn()
@@ -1554,6 +1582,16 @@ class StressListPanel(SatPanel):
     def enable_obliq(self):
         for e in [self.obliq_label, self.parameters['obliquity'],
                self.periapsis_label, self.parameters['periapsis_arg'] ]:
+            e.Enable()
+
+    def disable_orbitalrec(self):
+        for e in [self.init_label, self.parameters['initpos_arg'],
+               self.fin_label, self.parameters['finpos_arg'] ]:
+            e.Disable()
+        
+    def enable_orbitalrec(self):
+        for e in [self.init_label, self.parameters['initpos_arg'],
+               self.fin_label, self.parameters['finpos_arg'] ]:
             e.Enable()
 
     def enable_polar(self):
@@ -2397,6 +2435,7 @@ class GridCalcPanel(SatPanel):
                 action=self.sc.save_grid)
         except KeyError, e:
             error_dialog(self, str(e) + ' not defined', 'Grid Error')
+
         except LocalError, e:
             error_dialog(self, str(e), e.title)
 
@@ -4670,7 +4709,7 @@ class SatStressFrame(wx.Frame):
         self.SetAcceleratorTable(accel)
         
         #Upon a close event bind our events from the close dialog 'x' on the frame.
-        self.Bind(wx.EVT_CLOSE, self.OnCloseFrame)
+        self.Bind(wx.EVT_CLOSE, self.onCloseFrame)
 
         self.Show(True)
         self.CenterOnScreen()
@@ -4685,6 +4724,14 @@ class SatStressFrame(wx.Frame):
                     action=self.saveFile)
         except Exception, e:
             error_dialog(self, str(e), u'Save Error')
+
+    def saveFile(self,filename):
+        f = open(filename,'w')
+        for p,v in self.p.sc.parameters.items():
+            #Don't want to save to_plot_many_cycloids simply because this option shouldn't be loaded since the cycloids from the cycloids file aren't saved.
+            if v or v == 'to_plot_many_cycloids': 
+                f.write(p + ' = ' + str(v) + '\n')
+        f.close()
 
     def onLoad(self,evt):
         try:
@@ -4713,14 +4760,6 @@ class SatStressFrame(wx.Frame):
         self.p.sc.nsr_period_seconds2years()
         self.p.cy.updateFields() #Update the text fields in cycloids tab.
         self.p.nb.GetCurrentPage().update_parameters() #Update the current page's fields.
-
-    def saveFile(self,filename):
-        f = open(filename,'w')
-        for p,v in self.p.sc.parameters.items():
-            #Don't want to save to_plot_many_cycloids simply because this option shouldn't be loaded since the cycloids from the cycloids file aren't saved.
-            if v or v == 'to_plot_many_cycloids': 
-                f.write(p + ' = ' + str(v) + '\n')
-        f.close()
 
     def onQuit(self, evt):
         self.Close()
@@ -4782,7 +4821,7 @@ class SatStressFrame(wx.Frame):
     
     #Makes sure the user intended to quit the application.
     #At some point, make this conditional to if no changes have been made, no popup.
-    def OnCloseFrame(self, event):
+    def onCloseFrame(self, event):
         if self.p.sc.saveable_changed():
             dialog = wx.MessageDialog(self,
                 message = "To save your parameters and/or plot, return to the relevant tab and click the appropriate button",
@@ -4801,12 +4840,14 @@ class SatStressFrame(wx.Frame):
         sys.exit(0)
 
 # ===============================================================================
+# APP USED TO BOOTSTRAP THE wxPython SYSTEM & SET APP-WIDE PROPERTIES
+# ===============================================================================
 class SatStressApp(wx.App):
     def OnInit(self):
         self.frame = SatStressFrame(None, title=u'SatStressGUI V5.0', size=(1085,710))
         self.frame.Show(True)
         self.SetTopWindow(self.frame)
-        return True
+        return True #OnInit should return a boolean value
 
 def main():
     #Make Mac OS app be able to run calcLoveWahr4Layer from Resources.
