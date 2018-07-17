@@ -2347,7 +2347,7 @@ class GridCalcPanel(SatPanel):
         sz.Add(wx.StaticText(self, label=u"*For orbital position, periapse = 0."))
         sz.Add(wx.StaticText(self, label=u"*Sometimes the map will not generate for certain diurnal orbit values. If this happens, "))
         sz.Add(wx.StaticText(self, label=u'  change the number of increments or end value.'))
-        sz.Add(wx.StaticText(self, label=u'*The number of latitude and longitude grid points must be equal.'))
+        sz.Add(wx.StaticText(self, label=u'*The number of latitude and longitude grid points must be equal; therefore, only set the number of grid points for Latitude.\nThe Longitude will be automatically set to match the value entered for Latitude'))
         self.SetSizer(sz)
 
         self.update_parameters()
@@ -2368,6 +2368,7 @@ class GridCalcPanel(SatPanel):
         self.parameters['LON_MIN'].SetValue('-180')
         self.parameters['LON_MAX'].SetValue('180')
         self.parameters['LON_NUM'].SetValue('10')
+        self.parameters['LON_NUM'].Disable()
 
     def enable_nsr(self):
         for p in ['TIME_MIN', 'nsr_time', 'TIME_NUM']:
@@ -2404,6 +2405,7 @@ class GridCalcPanel(SatPanel):
             sts.Disable()
 
     def update_parameters(self):
+        self.parameters['LON_NUM'].SetValue(self.parameters['LAT_NUM'].GetValue())       
         super(GridCalcPanel, self).update_parameters()
         if self.sc.parameters.get('Nonsynchronous Rotation', False):
             self.enable_nsr()
