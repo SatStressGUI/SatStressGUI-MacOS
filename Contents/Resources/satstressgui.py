@@ -1978,6 +1978,7 @@ class PointPanel(SatPanel):
         self.update_parameters()
         self.bind_parameters()
         self.updating = False
+
         for i in range(1, self.rows + 1):
             self.parameters['orbit'][i].Bind(wx.EVT_KILL_FOCUS, lambda evt, row = i: self.on_orbit_update(evt, row))
             self.parameters['orbit'][i].Bind(wx.EVT_TEXT_ENTER, lambda evt, row = i: self.on_orbit_update(evt, row))
@@ -1993,7 +1994,7 @@ class PointPanel(SatPanel):
         orbitalStartEndSizer = wx.BoxSizer(wx.HORIZONTAL)
         orbitalIncrementSizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        #Widgets to add.  
+        #Widgets to add.
         note = wx.StaticText(self.autopopulateBox, -1, "Autopopulate with constant latitude/longitude and set orbital increment.")
         latitudeText = wx.StaticText(self.autopopulateBox, -1, "Latitude:")
         longitudeText = wx.StaticText(self.autopopulateBox, -1, "Longitude:")
@@ -2059,6 +2060,8 @@ class PointPanel(SatPanel):
     def onClear(self, event):
         for i in range(0, len(self.getAllTextCtrls())): 
             self.textctrls[i].Clear()
+        self.set_num_rows(0)
+        self.set_num_rows(100)
 
     #Helper method used in onAutopopulate. 
     def onSelect(self, event): 
@@ -2133,7 +2136,10 @@ class PointPanel(SatPanel):
         except:
             traceback.print_exc()
         self.updating = False
-                        
+        self.fieldPanel.Layout()
+        self.fieldPanel.SetupScrolling()
+        self.Layout()
+
     #Updates the t text ctrls when orbital pos is changed.
     def on_orbit_update(self, evt, row = 1):
         self.updating = True
@@ -2146,7 +2152,10 @@ class PointPanel(SatPanel):
         except:
             traceback.print_exc()
         self.updating = False
-    
+        self.fieldPanel.Layout()
+        self.fieldPanel.SetupScrolling()
+        self.Layout()
+
     def on_calc(self, evt):
         try:
             self.b.SetFocus()
@@ -2184,6 +2193,10 @@ class PointPanel(SatPanel):
         self.sc.set_parameter('point_rows',self.rows)
         for p,d in self.header1+self.header2+self.header3:
             self.bind_list_parameter(p)
+        self.parameters['orbit'][self.rows].Bind(wx.EVT_KILL_FOCUS, lambda evt, row = self.rows: self.on_orbit_update(evt, row))
+        self.parameters['orbit'][self.rows].Bind(wx.EVT_TEXT_ENTER, lambda evt, row = self.rows: self.on_orbit_update(evt, row))
+        self.parameters['t'][self.rows].Bind(wx.EVT_KILL_FOCUS, lambda evt, row = self.rows: self.on_t_update(evt, row))
+        self.parameters['t'][self.rows].Bind(wx.EVT_TEXT_ENTER, lambda evt, row = self.rows: self.on_t_update(evt, row))
 
     def add_row(self, panel, sz, params_d, defaultval):
         for p,d in params_d:
@@ -2237,11 +2250,18 @@ class PointPanel(SatPanel):
         self.sc.set_parameter('point_rows',self.rows)
         self.fieldPanel.Layout()
         self.fieldPanel.SetupScrolling()
+
+        for i in range(1, self.rows + 1):
+            self.parameters['orbit'][i].Bind(wx.EVT_KILL_FOCUS, lambda evt, row = i: self.on_orbit_update(evt, row))
+            self.parameters['orbit'][i].Bind(wx.EVT_TEXT_ENTER, lambda evt, row = i: self.on_orbit_update(evt, row))
+            self.parameters['t'][i].Bind(wx.EVT_KILL_FOCUS, lambda evt, row = i: self.on_t_update(evt, row))
+            self.parameters['t'][i].Bind(wx.EVT_TEXT_ENTER, lambda evt, row = i: self.on_t_update(evt, row))
         
     def load_entries(self, filename):
-        f = open(filename)
+        f = open(filename,'rU')
         csvreader = csv.reader(f)
-        coord = csvreader.next() #Skip headers.
+        headers = csvreader.next() #Skip headers.
+        coord = list(headers)
         data = list(csvreader)
         self.set_num_rows(len(data))
         try:
@@ -2253,6 +2273,11 @@ class PointPanel(SatPanel):
                     val = coord[keys.index(key)]
                     self.parameters[key][i+1].SetValue(val)
                     self.sc.set_parameter(key, val, point = i+1)
+
+                if (self.parameters['t'][i+1].GetValue() == "0" or self.parameters['t'][i+1].GetValue() == "") and (self.parameters['orbit'][i+1].GetValue() != "0" and self.parameters['orbit'][i+1].GetValue() != ""):
+                    self.on_orbit_update(wx.EVT_KILL_FOCUS,i+1)
+                elif (self.parameters['t'][i+1].GetValue() != "0" and self.parameters['t'][i+1].GetValue() != "") and (self.parameters['orbit'][i+1].GetValue() == "0" or self.parameters['orbit'][i+1].GetValue() == ""):
+                    self.on_t_update(wx.EVT_KILL_FOCUS,i+1)
         except:
             traceback.print_exc()
         finally:
