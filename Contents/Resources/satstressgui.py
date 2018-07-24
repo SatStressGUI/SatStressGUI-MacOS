@@ -53,7 +53,7 @@ from satstress.cycloid import Cycloid, SaveCycloidAsShape
 from satstress.stressplot import scalar_grid
 import satstress.physcon
 
-import re
+import re,tempfile
 
 #Used for mapping and saving to a shapefile.
 from osgeo import ogr
@@ -347,7 +347,8 @@ class SatelliteCalculation(object):
     def save_satellite(self, filename=None):
         tmp = False
         if not filename:
-            filename = os.tempnam(None, 'sat') #Saves to the temporary directory. This is necessary because of how satstress.py handles reading in the variables. -PS 2016
+            #Comment
+            #fd, filename = tempfile.mkstemp(suffix='sat',dir=None) #Saves to the temporary directory. This is necessary because of how satstress.py handles reading in the variables. -PS 2016
             tmp = True
         f = open(filename, 'w')
         t = self.parameters['NSR_PERIOD']
@@ -1135,7 +1136,17 @@ class SatPanel(wx.Panel):
                         else:
                             ctrl.SetValue(False)
                     else:
-                        ctrl.SetValue(self.sc.parameters[p])
+                        pass
+                        #Comment
+                        #print "p is:"
+                        #print self.sc.parameters[p]
+                        #print type(self.sc.parameters[p])
+                        #print "ctrl is:"
+                        #print ctrl
+                        #if isinstance(self.sc.parameters[p],int):
+                            #ctrl.SetValue(str(self.sc.parameters[p]).decode("utf-8"))
+                        #else:
+                            #ctrl.SetValue(self.sc.parameters[p])
             except KeyError, e:
                 #Keys in the SatelliteCalculation Class are not defined, uncomment print statements to see stderr message
                 pass
@@ -2397,7 +2408,11 @@ class GridCalcPanel(SatPanel):
         self.parameters['LON_MIN'].SetValue('-180')
         self.parameters['LON_MAX'].SetValue('180')
         self.parameters['LON_NUM'].SetValue('10')
+        self.parameters['LAT_NUM'].Bind(wx.EVT_TEXT,lambda evt:self.on_gridPoint_update())
         self.parameters['LON_NUM'].Disable()
+
+    def on_gridPoint_update(self):
+        self.parameters['LON_NUM'].SetValue(self.parameters['LAT_NUM'].GetValue())
 
     def enable_nsr(self):
         for p in ['TIME_MIN', 'nsr_time', 'TIME_NUM']:
@@ -2434,7 +2449,7 @@ class GridCalcPanel(SatPanel):
             sts.Disable()
 
     def update_parameters(self):
-        self.parameters['LON_NUM'].SetValue(self.parameters['LAT_NUM'].GetValue())       
+        self.parameters['LON_NUM'].SetValue(self.parameters['LAT_NUM'].GetValue())
         super(GridCalcPanel, self).update_parameters()
         if self.sc.parameters.get('Nonsynchronous Rotation', False):
             self.enable_nsr()
