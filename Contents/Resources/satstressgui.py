@@ -347,8 +347,7 @@ class SatelliteCalculation(object):
     def save_satellite(self, filename=None):
         tmp = False
         if not filename:
-            #Comment
-            #fd, filename = tempfile.mkstemp(suffix='sat',dir=None) #Saves to the temporary directory. This is necessary because of how satstress.py handles reading in the variables. -PS 2016
+            fd, filename = tempfile.mkstemp(suffix='sat',dir=None) #Saves to the temporary directory. This is necessary because of how satstress.py handles reading in the variables. -PS 2016
             tmp = True
         f = open(filename, 'w')
         t = self.parameters['NSR_PERIOD']
