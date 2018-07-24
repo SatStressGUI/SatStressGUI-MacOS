@@ -1135,17 +1135,10 @@ class SatPanel(wx.Panel):
                         else:
                             ctrl.SetValue(False)
                     else:
-                        pass
-                        #Comment
-                        #print "p is:"
-                        #print self.sc.parameters[p]
-                        #print type(self.sc.parameters[p])
-                        #print "ctrl is:"
-                        #print ctrl
-                        #if isinstance(self.sc.parameters[p],int):
-                            #ctrl.SetValue(str(self.sc.parameters[p]).decode("utf-8"))
-                        #else:
-                            #ctrl.SetValue(self.sc.parameters[p])
+                        if isinstance(self.sc.parameters[p],int):
+                            ctrl.SetValue(str(self.sc.parameters[p]).decode("utf-8"))
+                        else:
+                            ctrl.SetValue(self.sc.parameters[p])
             except KeyError, e:
                 #Keys in the SatelliteCalculation Class are not defined, uncomment print statements to see stderr message
                 pass
