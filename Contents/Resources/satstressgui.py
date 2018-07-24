@@ -522,32 +522,36 @@ class SatelliteCalculation(object):
     #Calculates tensor stresses. 
     def calc_tensor(self, directionSelection, rows=1):
         for i in range(rows):
-            theta, phi, t = [ float(self.parameters[p][i]) for p in ['theta', 'phi', 't'] ]
-            t *= seconds_in_year
+            try:
+                theta, phi, t = [ float(self.parameters[p][i]) for p in ['theta', 'phi', 't'] ]
+                t *= seconds_in_year
 
-            #Add the ability for the user to select their desired coordinate system. -ND 2017 
-            #The calculations in this program assume an east positive (0±180) coordinate system, so if the
-            #user opts for a different coordinate system just convert their input to east positive (0±180).
+                #Add the ability for the user to select their desired coordinate system. -ND 2017 
+                #The calculations in this program assume an east positive (0±180) coordinate system, so if the
+                #user opts for a different coordinate system just convert their input to east positive (0±180).
 
-            #0: east positive (0±180), 1: west positive (0±180), 2: east positive (0-360), 3: west positive (0-360).
-            if directionSelection == 1:
-                phi = -phi #Conversion from west positive (0±180) to east positive (0±180).
-            elif directionSelection == 2 or directionSelection == 3:  
-                if phi > 180: 
-                    phi -= 360 #Conversion from east positive (0-360) to east positive (0±180). 
-                if directionSelection == 3: 
-                    phi = -phi #Conversion from west positive (0-360) to east positive (0±180).
-            theta, phi = map(numpy.radians, [theta, phi])
-            calc = self.get_calc()
-            Ttt, Tpt, Tpp = [ "%g" % (x/1000.) for x in calc.tensor(numpy.pi/2 - theta, phi, t)]
-            self.parameters["Ttt"][i] = Ttt
-            self.parameters["Tpt"][i] = Tpt
-            self.parameters["Tpp"][i] = Tpp #http://pirlwww.lpl.arizona.edu/~hoppa/science.html
-            s1, a1, s3, a3 = calc.principal_components(numpy.pi/2-theta, phi, t)
-            self.parameters['s1'][i] = "%g" % (s1/1000.)
-            self.parameters['s3'][i] = "%g" % (s3/1000.)
-            self.parameters['a'][i] = "%.2f" % numpy.degrees(a1)
-        
+                #0: east positive (0±180), 1: west positive (0±180), 2: east positive (0-360), 3: west positive (0-360).
+                if directionSelection == 1:
+                    phi = -phi #Conversion from west positive (0±180) to east positive (0±180).
+                elif directionSelection == 2 or directionSelection == 3:  
+                    if phi > 180: 
+                        phi -= 360 #Conversion from east positive (0-360) to east positive (0±180). 
+                    if directionSelection == 3: 
+                        phi = -phi #Conversion from west positive (0-360) to east positive (0±180).
+                theta, phi = map(numpy.radians, [theta, phi])
+                calc = self.get_calc()
+                Ttt, Tpt, Tpp = [ "%g" % (x/1000.) for x in calc.tensor(numpy.pi/2 - theta, phi, t)]
+                self.parameters["Ttt"][i] = Ttt
+                self.parameters["Tpt"][i] = Tpt
+                self.parameters["Tpp"][i] = Tpp #http://pirlwww.lpl.arizona.edu/~hoppa/science.html
+                s1, a1, s3, a3 = calc.principal_components(numpy.pi/2-theta, phi, t)
+                self.parameters['s1'][i] = "%g" % (s1/1000.)
+                self.parameters['s3'][i] = "%g" % (s3/1000.)
+                self.parameters['a'][i] = "%.2f" % numpy.degrees(a1)
+            except ValueError, e:
+                traceback.print_exc()
+                raise LocalError(str(e),"Invalid Input")
+                error_dialog(self, str(e), e.title)
     #Saves netcdf files from parameters.
     #This function currently won't work because we have commented out the netCDF3 import.
     #The netCDF functionality isn't really necessary, and the netCDF library doesn't play well on Windows. -PS 2016
@@ -893,7 +897,7 @@ def dir_dialog(parent, message="", style=wx.OPEN, action=None, **kw):
     file_dir_dialog(parent, wx.DirDialog, message, style, action, **kw)
 
 def error_dialog(parent, e, title=u'Error'):
-    d = wx.MessageDialog(parent, e, title, style=wx.ICON_ERROR|wx.OK)
+    d = wx.MessageDialog(parent, e, title, style=wx.ICON_HAND | wx.OK)
     d.ShowModal()
 
 #Puts dialogs windows into layout?
@@ -2149,7 +2153,7 @@ class PointPanel(SatPanel):
             t = str(float(self.sc.parameters['orbit'][row - 1])/360.0*sat.orbit_period()/seconds_in_year)
             self.parameters['t'][row].SetValue(t)
             self.sc.set_parameter('t', t, point = row)
-        except:
+        except ValueError, e:
             traceback.print_exc()
         self.updating = False
         self.fieldPanel.Layout()
@@ -2274,9 +2278,9 @@ class PointPanel(SatPanel):
                     self.parameters[key][i+1].SetValue(val)
                     self.sc.set_parameter(key, val, point = i+1)
 
-                if (self.parameters['t'][i+1].GetValue() == "0" or self.parameters['t'][i+1].GetValue() == "") and (self.parameters['orbit'][i+1].GetValue() != "0" and self.parameters['orbit'][i+1].GetValue() != ""):
+                if (self.parameters['orbit'][i+1].GetValue() != ""):
                     self.on_orbit_update(wx.EVT_KILL_FOCUS,i+1)
-                elif (self.parameters['t'][i+1].GetValue() != "0" and self.parameters['t'][i+1].GetValue() != "") and (self.parameters['orbit'][i+1].GetValue() == "0" or self.parameters['orbit'][i+1].GetValue() == ""):
+                elif (self.parameters['t'][i+1].GetValue() != ""):
                     self.on_t_update(wx.EVT_KILL_FOCUS,i+1)
         except:
             traceback.print_exc()
