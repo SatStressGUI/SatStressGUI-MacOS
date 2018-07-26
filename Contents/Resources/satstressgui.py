@@ -388,7 +388,7 @@ class SatelliteCalculation(object):
     def save_grid(self, filename=None):
         tmp = False
         if filename is None:
-            filename = os.tempnam(None, 'grid')
+            fd, filename = tempfile.mkstemp(suffix='grid',dir=None)
             tmp = True
         f = open(filename, 'w')
         try:
@@ -578,7 +578,7 @@ class SatelliteCalculation(object):
     
     #Constructs a netcdf file.
     def load_netcdf_satellite(self, nc):
-        satfilename = os.tempnam(None, 'sat')
+        fd, satfilename = tempfile.mkstemp(suffix='sat',dir=None)
         fs = open(satfilename, 'w')
         for v in ['system_id',
             'planet_mass',
@@ -617,7 +617,7 @@ class SatelliteCalculation(object):
     
     #Writes netcdf grids with write_var.
     def load_netcdf_grid(self, nc):
-        gridfilename = os.tempnam(None, 'grid')
+        fd, gridfilename = tempfile.mkstemp(suffix='grid',dir=None)
         fs = open(gridfilename, 'w')
         self.write_var(fs, nc, 'grid_id')
         for v, fv in [
@@ -2306,7 +2306,7 @@ class PointPanel(SatPanel):
     def save_pointcalc(self, filename=None):
         tmp = False
         if not filename:
-            filename = os.tempnam(None, 'csv')
+            fd, filename = tempfile.mkstemp(suffix='csv',dir=None)
             tmp = True
         f = open(filename, 'wb')
         writer = csv.writer(f)
@@ -2613,7 +2613,7 @@ class CycloidsPanel(SatPanel):
     def save_cyclparams(self, filename):
         tmp = False
         if filename is None:
-            filename = os.tempnam(None, 'grid')
+            fd, filename = tempfile.mkstemp(suffix='grid',dir=None)
             tmp = True
         f = open(filename, 'w')
         for k,v in self.sc.cycloid_parameters_d.items():
