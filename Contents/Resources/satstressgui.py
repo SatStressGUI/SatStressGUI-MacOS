@@ -38,12 +38,12 @@ from matplotlib.figure import Figure
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import Normalize
 
-#For manipulating netCDF files.
-#import netCDF3
-#Does not run in Windows, so we've commented it out here to make for easy copying. -PS 2016
-
 #For math functions.
 import numpy
+
+#For manipulating netCDF files.
+import netCDF3
+#Does not run in Windows, so we've commented it out here to make for easy copying. -PS 2016
 
 #satstress library
 from satstress.satstress import *
@@ -435,6 +435,8 @@ class SatelliteCalculation(object):
             self.grid_changed = True
         except Exception, e:
             print e.__class__.__name__, e
+            #print "Entry: 5"
+            #traceback.print_exc()
             raise LocalError(e, u'Grid Error')
         finally:
             f.close()
@@ -446,6 +448,8 @@ class SatelliteCalculation(object):
         try:
             self.grid = Grid(f, self.get_satellite())
         except Exception, e:
+            #print "Entry: 1"
+            #traceback.print_exc()
             raise LocalError(e, u'Grid Error')
         finally:
             f.close()
@@ -468,8 +472,12 @@ class SatelliteCalculation(object):
                         saved[p] = True
             return s
         except KeyError, e:
+            #print "Entry: 2"
+            #traceback.print_exc()
             raise LocalError('Grid parameter %s is not defined' % str(e), u'Grid Error')
         except Exception, e:
+            #print "Entry: 3"
+            #traceback.print_exc()
             raise LocalError(str(e), u'Grid Error')
     #Writes calculated love numbers to a file.
     def save_love(self, filename):
@@ -552,9 +560,8 @@ class SatelliteCalculation(object):
                 traceback.print_exc()
                 raise LocalError(str(e),"Invalid Input")
                 error_dialog(self, str(e), e.title)
+
     #Saves netcdf files from parameters.
-    #This function currently won't work because we have commented out the netCDF3 import.
-    #The netCDF functionality isn't really necessary, and the netCDF library doesn't play well on Windows. -PS 2016
     def save_netcdf(self, filename):
         try:
             sat = self.get_satellite()
@@ -570,6 +577,7 @@ class SatelliteCalculation(object):
             self.mk_satellite()
             self.satellite_save_changed = self.grid_save_changed = False
         except Exception, e:
+            #traceback.print_exc()
             raise LocalError(str(e), 'Export Error')
 
     #Helper function for load_netcdf_satellite.
@@ -954,7 +962,11 @@ class ComboBox2(wx.ComboBox):
 def add_parameters_to_sizer(parent, sz, parameters_d):
     parameters = {}
     for p, d in parameters_d:
-        sz.Add(wx.StaticText(parent, label=d), flag=wx.ALIGN_CENTER_VERTICAL)
+        text = wx.StaticText(parent, label=d)
+        #font = wx.Font(15, wx.DEFAULT, wx.NORMAL, 0)
+        #text.SetFont(font)
+        sz.Add(text, flag=wx.ALIGN_CENTER_VERTICAL)
+
         parameters[p] = wx.TextCtrl(parent, style=wx.TE_PROCESS_ENTER)
         sz.Add(parameters[p], flag=wx.EXPAND|wx.ALL)
     return parameters
@@ -1041,6 +1053,8 @@ def add_radiobox2_to_sizer(parent, sz, parameter, description, choices):
 def add_static_texts(parent, sz, parameters_d):
     sts = [ wx.StaticText(parent, label=d, style=wx.TE_PROCESS_ENTER) for p, d in parameters_d ]
     for st in sts:
+        font = wx.Font(15, wx.DEFAULT, wx.NORMAL, 0)
+        st.SetFont(font)
         sz.Add(st, flag=wx.ALIGN_CENTER)
     return sts
 
@@ -1163,11 +1177,11 @@ class SatelliteLayersPanel(SatPanel):
         top = wx.BoxSizer(orient=wx.VERTICAL)
 
         bp = wx.BoxSizer(orient=wx.HORIZONTAL)
-        load_b = wx.Button(self, label=u'Load from file')
-        save_b = wx.Button(self, label=u'Save to file')
-        bp.Add(load_b, 1, wx.EXPAND)
-        bp.AddSpacer(3) 
-        bp.Add(save_b, 1, wx.EXPAND)
+        # load_b = wx.Button(self, label=u'Load from file')
+        # save_b = wx.Button(self, label=u'Save to file',size=(50,50))
+        # bp.Add(load_b, 1, wx.EXPAND)
+        # bp.AddSpacer(3) 
+        # bp.Add(save_b, 1, wx.EXPAND)
         
         #The wx.FlexGridSizer object organizes visual elements into a grid layout. 
         sp = wx.FlexGridSizer(1,2)
@@ -1210,20 +1224,32 @@ class SatelliteLayersPanel(SatPanel):
         sz.Add(filler)
         sz.Add(lp)
 
-        sz.AddSpacer(10)
+        btn = wx.BoxSizer(orient=wx.HORIZONTAL)
+        load_b = wx.Button(self, label=u'Load from file')
+        save_b = wx.Button(self, label=u'Save to file')
+        btn.Add(load_b, 1, wx.HORIZONTAL)
+        btn.AddSpacer(3)
+        btn.Add(save_b, 1, wx.HORIZONTAL)
+
+        sz.Add(btn)
+
+        sz.AddSpacer(100)
         #This text was added to provide new users with important information. -PS 2016
-        sz.Add(wx.StaticText(self, label=u'This model makes several assumptions when calculating stresses:'))
-        sz.Add(wx.StaticText(self, label=u'1. The body is assumed to be composed of four layers, with the third layer being a liquid ocean.'))
-        sz.Add(wx.StaticText(self, label=u'2. It is assumed to behave in a viscoelastic manner.'))
-        sz.Add(wx.StaticText(self, label=u'3. Each layer is considered to be homogenous throughout, with no differences in density or thickness based on location, but decreasing in mass out from the core.'))
-        sz.Add(wx.StaticText(self, label=u'4. The Polar Wander stress assumes that the body is in a circular, zero-inclination, synchronous orbit.'))
-        sz.Add(wx.StaticText(self, label=u'5. Polar Wander stress is calculated using an elastic model.'))
-        sz.Add(wx.StaticText(self, label=u'6. The orbit is assumed to have an eccentricity of <0.25, and the primary\'s mass be at least 10x the satellite\'s mass.'))
+        satguide = wx.StaticText(self, label=u'This model makes several assumptions when calculating stresses:\n\
+1. The body is assumed to be composed of four layers, with the third layer being a liquid ocean.\n\
+2. It is assumed to behave in a viscoelastic manner.\n\
+3. Each layer is considered to be homogenous throughout, with no differences in density or thickness based on location, but decreasing in mass out from the core.\n\
+4. The Polar Wander stress assumes that the body is in a circular, zero-inclination, synchronous orbit.\n\
+5. Polar Wander stress is calculated using an elastic model.\n\
+6. The orbit is assumed to have an eccentricity of <0.25, and the primary\'s mass be at least 10x the satellite\'s mass.')
+        satFont =  wx.Font(15, wx.DEFAULT, wx.NORMAL, 0)
+        satguide.SetFont(satFont)
+        sz.Add(satguide)
         
-        sz.AddSpacer(222)
+        sz.AddSpacer(50)
         helpSizer = wx.BoxSizer(wx.HORIZONTAL)
         HelpText = wx.StaticText(self, label=u'*For help in using this program, select "Getting Started" in the Help menu.')
-        HelpFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, 0) #Sets the font and font size. -PS 2016
+        HelpFont = wx.Font(15, wx.DEFAULT, wx.NORMAL, 0) #Sets the font and font size. -PS 2016
         HelpText.SetFont(HelpFont)
         helpSizer.Add(HelpText)
         sz.Add(helpSizer, 1, wx.ALIGN_RIGHT)
@@ -2435,10 +2461,14 @@ class GridCalcPanel(SatPanel):
             self.orbital_set = 1
             
     def disable_orbit(self):
+        self.parameters['ORBIT_MIN'].SetValue('0')
+        self.parameters['ORBIT_MAX'].SetValue('1')
+        self.parameters['ORBIT_NUM'].SetValue('1')
         for p in ['ORBIT_MIN', 'ORBIT_MAX', 'ORBIT_NUM']:
             self.parameters[p].Disable()
         for sts in self.orbit_labels:
             sts.Disable()
+        self.orbital_set = 0
 
     def update_parameters(self):
         self.parameters['LON_NUM'].SetValue(self.parameters['LAT_NUM'].GetValue())
@@ -2448,7 +2478,7 @@ class GridCalcPanel(SatPanel):
         else:
             self.disable_nsr()
         if self.sc.parameters.get('Diurnal', False) or \
-                self.sc.parameters.get('Obliquity', False):
+                self.sc.parameters.get('Nonsynchronous Rotation', False):
             self.enable_orbit()
         else: 
             self.disable_orbit()
@@ -2472,6 +2502,8 @@ class GridCalcPanel(SatPanel):
                 defaultFile=self.sc.parameters['GRID_ID'] + '.grid',
                 action=self.sc.save_grid)
         except KeyError, e:
+            #print "Entry: 4"
+            #traceback.print_exc()
             error_dialog(self, str(e) + ' not defined', 'Grid Error')
 
         except LocalError, e:
