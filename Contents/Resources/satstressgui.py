@@ -43,7 +43,6 @@ import numpy
 
 #For manipulating netCDF files.
 import netCDF3
-#Does not run in Windows, so we've commented it out here to make for easy copying. -PS 2016
 
 #satstress library
 from satstress.satstress import *
@@ -435,8 +434,6 @@ class SatelliteCalculation(object):
             self.grid_changed = True
         except Exception, e:
             print e.__class__.__name__, e
-            #print "Entry: 5"
-            #traceback.print_exc()
             raise LocalError(e, u'Grid Error')
         finally:
             f.close()
@@ -448,8 +445,6 @@ class SatelliteCalculation(object):
         try:
             self.grid = Grid(f, self.get_satellite())
         except Exception, e:
-            #print "Entry: 1"
-            #traceback.print_exc()
             raise LocalError(e, u'Grid Error')
         finally:
             f.close()
@@ -472,12 +467,8 @@ class SatelliteCalculation(object):
                         saved[p] = True
             return s
         except KeyError, e:
-            #print "Entry: 2"
-            #traceback.print_exc()
             raise LocalError('Grid parameter %s is not defined' % str(e), u'Grid Error')
         except Exception, e:
-            #print "Entry: 3"
-            #traceback.print_exc()
             raise LocalError(str(e), u'Grid Error')
     #Writes calculated love numbers to a file.
     def save_love(self, filename):
@@ -577,7 +568,6 @@ class SatelliteCalculation(object):
             self.mk_satellite()
             self.satellite_save_changed = self.grid_save_changed = False
         except Exception, e:
-            #traceback.print_exc()
             raise LocalError(str(e), 'Export Error')
 
     #Helper function for load_netcdf_satellite.
@@ -962,11 +952,7 @@ class ComboBox2(wx.ComboBox):
 def add_parameters_to_sizer(parent, sz, parameters_d):
     parameters = {}
     for p, d in parameters_d:
-        text = wx.StaticText(parent, label=d)
-        #font = wx.Font(15, wx.DEFAULT, wx.NORMAL, 0)
-        #text.SetFont(font)
-        sz.Add(text, flag=wx.ALIGN_CENTER_VERTICAL)
-
+        sz.Add(wx.StaticText(parent, label=d), flag=wx.ALIGN_CENTER_VERTICAL)
         parameters[p] = wx.TextCtrl(parent, style=wx.TE_PROCESS_ENTER)
         sz.Add(parameters[p], flag=wx.EXPAND|wx.ALL)
     return parameters
@@ -1053,8 +1039,6 @@ def add_radiobox2_to_sizer(parent, sz, parameter, description, choices):
 def add_static_texts(parent, sz, parameters_d):
     sts = [ wx.StaticText(parent, label=d, style=wx.TE_PROCESS_ENTER) for p, d in parameters_d ]
     for st in sts:
-        font = wx.Font(15, wx.DEFAULT, wx.NORMAL, 0)
-        st.SetFont(font)
         sz.Add(st, flag=wx.ALIGN_CENTER)
     return sts
 
@@ -1175,13 +1159,6 @@ class SatelliteLayersPanel(SatPanel):
         filler.AddSpacer(15)
 
         top = wx.BoxSizer(orient=wx.VERTICAL)
-
-        bp = wx.BoxSizer(orient=wx.HORIZONTAL)
-        # load_b = wx.Button(self, label=u'Load from file')
-        # save_b = wx.Button(self, label=u'Save to file',size=(50,50))
-        # bp.Add(load_b, 1, wx.EXPAND)
-        # bp.AddSpacer(3) 
-        # bp.Add(save_b, 1, wx.EXPAND)
         
         #The wx.FlexGridSizer object organizes visual elements into a grid layout. 
         sp = wx.FlexGridSizer(1,2)
@@ -1215,7 +1192,14 @@ class SatelliteLayersPanel(SatPanel):
         self.textCtrlsModified = 0 
         for textCtrl in textCtrls: 
             textCtrl.Bind(wx.EVT_TEXT, self.grayOut)
-      
+
+        bp = wx.BoxSizer(orient=wx.HORIZONTAL)
+        load_b = wx.Button(self, label=u'Load from file')
+        save_b = wx.Button(self, label=u'Save to file',size=(50,50))
+        bp.Add(load_b, 1, wx.EXPAND)
+        bp.AddSpacer(3) 
+        bp.Add(save_b, 1, wx.EXPAND)      
+
         top.Add(bp, 0, wx.ALL|wx.EXPAND)
         top.Add(filler)
         top.Add(sp)
@@ -1224,16 +1208,7 @@ class SatelliteLayersPanel(SatPanel):
         sz.Add(filler)
         sz.Add(lp)
 
-        btn = wx.BoxSizer(orient=wx.HORIZONTAL)
-        load_b = wx.Button(self, label=u'Load from file')
-        save_b = wx.Button(self, label=u'Save to file')
-        btn.Add(load_b, 1, wx.HORIZONTAL)
-        btn.AddSpacer(3)
-        btn.Add(save_b, 1, wx.HORIZONTAL)
-
-        sz.Add(btn)
-
-        sz.AddSpacer(100)
+        sz.AddSpacer(50)
         #This text was added to provide new users with important information. -PS 2016
         satguide = wx.StaticText(self, label=u'This model makes several assumptions when calculating stresses:\n\
 1. The body is assumed to be composed of four layers, with the third layer being a liquid ocean.\n\
@@ -1242,8 +1217,6 @@ class SatelliteLayersPanel(SatPanel):
 4. The Polar Wander stress assumes that the body is in a circular, zero-inclination, synchronous orbit.\n\
 5. Polar Wander stress is calculated using an elastic model.\n\
 6. The orbit is assumed to have an eccentricity of <0.25, and the primary\'s mass be at least 10x the satellite\'s mass.')
-        satFont =  wx.Font(15, wx.DEFAULT, wx.NORMAL, 0)
-        satguide.SetFont(satFont)
         sz.Add(satguide)
         
         sz.AddSpacer(50)
@@ -2502,8 +2475,6 @@ class GridCalcPanel(SatPanel):
                 defaultFile=self.sc.parameters['GRID_ID'] + '.grid',
                 action=self.sc.save_grid)
         except KeyError, e:
-            #print "Entry: 4"
-            #traceback.print_exc()
             error_dialog(self, str(e) + ' not defined', 'Grid Error')
 
         except LocalError, e:
