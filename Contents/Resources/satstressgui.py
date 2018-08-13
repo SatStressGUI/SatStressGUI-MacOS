@@ -1416,9 +1416,10 @@ class StressListPanel(SatPanel):
         sz.Add(wx.StaticText(self, label=u"   but the principal stress vectors are rotated 180° for some reason."))
 
         sz.AddSpacer(5)
+
         #For Orbital Recession
         self.parameters.update(add_checkboxes_to_sizer(self, sz,
-            [ ('Orbital Recession', 'Orbit Recession') ]))
+            [ ('Orbital Recession', 'Orbital Recession') ]))
         OrbRec_sz = wx.BoxSizer(wx.VERTICAL)
         initSemiMajor_sz = wx.BoxSizer(orient=wx.HORIZONTAL)
         initSemiMajor_sz.AddSpacer(28) 
@@ -1592,12 +1593,12 @@ class StressListPanel(SatPanel):
 
     def disable_orbitalrec(self):
         for e in [self.init_label, self.parameters['initpos_arg'],
-               self.fin_label, self.parameters['finpos_arg'] ]:
+               self.fin_label, self.parameters['finpos_arg'],self.parameters['Orbital Recession']]:
             e.Disable()
         
     def enable_orbitalrec(self):
         for e in [self.init_label, self.parameters['initpos_arg'],
-               self.fin_label, self.parameters['finpos_arg'] ]:
+               self.fin_label, self.parameters['finpos_arg'],self.parameters['Orbital Recession']]:
             e.Enable()
 
     def enable_polar(self):
