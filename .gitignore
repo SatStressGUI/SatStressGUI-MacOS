@@ -1,2 +1,4 @@
-#Mac file created in every directory 
+#This files is used to manage which files Git will and will not keep track of
+
+#Don't include the Mac file created in every directory 
 *.DS_Store

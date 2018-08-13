@@ -1735,6 +1735,7 @@ class StressListPanel(SatPanel):
     def set_h2NSR(self, evt):
         self.sc.stresses_changed = True
         self.sc.stress_d['Nonsynchronous Rotation'].loveUser.update_h2(fself.parse_complex(evt.GetString()))
+        #traceback.print_exc()
 
     def set_k2NSR(self, evt):
         self.sc.stresses_changed = True
@@ -4222,6 +4223,7 @@ class ScalarPlotPanel(PlotPanel):
         lat_min, lat_max = self.consider_obliq_lats(self.grid.lat_min,
                 self.grid.lat_max)
         for self.plot_field in ['tens', 'comp', 'mean', 'diff']:
+            #print self.plot_field
             scalar_grid(
                 stresscalc = self.calc,
                 nlons = self.grid.lon_num,
@@ -4805,7 +4807,8 @@ class SatStressFrame(wx.Frame):
     def onQuit(self, evt):
         self.Close()
 
-    def messageDisplay(self,filename,title):
+    #read the desired text from filename and pass the text to a message display box
+    def readMessage(self,filename,title):
         path = "Information/"+filename
         f = open(path,"r")
         try:
@@ -4819,42 +4822,43 @@ class SatStressFrame(wx.Frame):
 
     def onRights(self, evt):
         copyright = "Copyright 2017, by the California Institute of Technology." #Update year whenever a new version is released.
-        self.messageDisplay("rights.txt",copyright)
+        self.readMessage("rights.txt",copyright)
     def onDevelopment(self, evt):
-        self.messageDisplay("development.txt","Developers")
+        self.readMessage("development.txt","Developers")
     def onUpdates(self, evt):
-        self.messageDisplay("updates.txt","Version 5.0")
+        self.readMessage("updates.txt","Version 5.0")
     def onContacts(self, evt):#Create a message dialog box.
         self.makeMsgDialog(u"Alex Patthoff via patthoff@jpl.nasa.gov",u"Primary Contact")
     def onDiurnalref(self, evt):
-        self.messageDisplay("diurnalref.txt","About Diurnal Tides")
+        self.readMessage("diurnalref.txt","About Diurnal Tides")
     def onNSRref(self, evt):
-        self.messageDisplay("NSRref.txt","About Nonsynchronous Rotation")
+        self.readMessage("NSRref.txt","About Nonsynchronous Rotation")
     def onObliquityref(self, evt):
-        self.messageDisplay("Obliquityref.txt","About Oblique Orbits")
+        self.readMessage("Obliquityref.txt","About Oblique Orbits")
     def onISTref(self, evt):
-        self.messageDisplay("ISTref.txt","About Ice Shell Volume Change")
+        self.readMessage("ISTref.txt","About Ice Shell Volume Change")
     def onPWref(self, evt):
-        self.messageDisplay("PWref.txt","About Polar Wander")
+        self.readMessage("PWref.txt","About Polar Wander")
     def onCycloidsref(self, evt):
-        self.messageDisplay("Cycloidsref.txt","About Cycloids")
+        self.readMessage("Cycloidsref.txt","About Cycloids")
     def onTutorial(self, evt):
-        self.messageDisplay("tutorial.txt","Getting Started")
+        self.readMessage("tutorial.txt","Getting Started")
     def onHelpSat(self, evt):
-        self.messageDisplay("helpsat.txt","The Satellite Tab")
+        self.readMessage("helpsat.txt","The Satellite Tab")
     def onHelpStresses(self, evt):
-        self.messageDisplay("helpstresses.txt","The Stresses Tab")
+        self.readMessage("helpstresses.txt","The Stresses Tab")
     def onHelpPoint(self, evt):
-        self.messageDisplay("helppoint.txt","The Point Tab")
+        self.readMessage("helppoint.txt","The Point Tab")
     def onHelpGrid(self, evt):
-        self.messageDisplay("helpgrid.txt","The Grid Tab")
+        self.readMessage("helpgrid.txt","The Grid Tab")
     def onHelpCycloids(self, evt):
-        self.messageDisplay("helpcycloids.txt","The Cycloids Tab")
+        self.readMessage("helpcycloids.txt","The Cycloids Tab")
     def onHelpPlot(self, evt):
-        self.messageDisplay("helpplot.txt","The Plot Tab")
+        self.readMessage("helpplot.txt","The Plot Tab")
     def onHelpGrayedOutInstructions(self, evt):
-        self.messageDisplay("helpgrayedoutinstructions.txt","Grayed Out/Disabled Panels")
+        self.readMessage("helpgrayedoutinstructions.txt","Grayed Out/Disabled Panels")
 
+    #Creates a message dialog to display the message
     def makeMsgDialog(self, msg, title):
         msg = wx.MessageDialog(self, msg, title, wx.OK | wx.ICON_INFORMATION)
         msg.ShowModal()
