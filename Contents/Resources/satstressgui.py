@@ -2258,7 +2258,7 @@ class PointPanel(SatPanel):
         self.sc.set_parameter('point_rows',self.rows)
         self.fieldPanel.Layout()
         self.fieldPanel.SetupScrolling()
-
+        #Needed for rows to autocalculate their 't' and 'orbit parameters'
         for i in range(1, self.rows + 1):
             self.parameters['orbit'][i].Bind(wx.EVT_KILL_FOCUS, lambda evt, row = i: self.on_orbit_update(evt, row))
             self.parameters['orbit'][i].Bind(wx.EVT_TEXT_ENTER, lambda evt, row = i: self.on_orbit_update(evt, row))
@@ -2281,9 +2281,10 @@ class PointPanel(SatPanel):
                     val = coord[keys.index(key)]
                     self.parameters[key][i+1].SetValue(val)
                     self.sc.set_parameter(key, val, point = i+1)
-
+                # t value is calculated based on non-null orbit value
                 if (self.parameters['orbit'][i+1].GetValue() != ""):
                     self.on_orbit_update(wx.EVT_KILL_FOCUS,i+1)
+                # null orbit value calculated based off t if t is not null too
                 elif (self.parameters['t'][i+1].GetValue() != ""):
                     self.on_t_update(wx.EVT_KILL_FOCUS,i+1)
         except:
@@ -2404,6 +2405,7 @@ class GridCalcPanel(SatPanel):
         self.parameters['LAT_NUM'].Bind(wx.EVT_TEXT,lambda evt:self.on_gridPoint_update())
         self.parameters['LON_NUM'].Disable()
 
+    #Used to update LON_NUM whenever LAT_NUM is modified
     def on_gridPoint_update(self):
         self.parameters['LON_NUM'].SetValue(self.parameters['LAT_NUM'].GetValue())
 
@@ -2436,6 +2438,7 @@ class GridCalcPanel(SatPanel):
             self.orbital_set = 1
             
     def disable_orbit(self):
+        #Orbital parameters need default values for calculations to work
         self.parameters['ORBIT_MIN'].SetValue('0')
         self.parameters['ORBIT_MAX'].SetValue('1')
         self.parameters['ORBIT_NUM'].SetValue('1')
