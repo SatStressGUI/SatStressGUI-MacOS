@@ -1,6 +1,5 @@
 def _chdir_resource():
     import os
-    #os.environ['RESOURCEPATH'] = "/Users/edgarol/Documents/SatStressGUI/Contents/Resources"
     os.chdir(os.environ['RESOURCEPATH'])
 _chdir_resource()
 

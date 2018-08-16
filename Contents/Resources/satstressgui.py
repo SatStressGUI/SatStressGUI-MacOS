@@ -3272,12 +3272,15 @@ class PlotPanel(SatPanel):
                 error_dialog(self, str(e), e.title)
         except Exception, e:
             if self.sc.satellite or self.sc.grid:
-                if not self.sc.get_stresses():
-                    traceback.print_exc()
-                    error_dialog(self, 'Stresses are not defined', 'Plot Error')
-                else:
-                    traceback.print_exc()
-                    error_dialog(self, e.__class__.__name__ + ': ' + str(e), "Plot Error")
+                for stress in self.sc.stresses:
+                    if isinstance(stress,satstress.satstress.NSR) and self.sc.parameters['NSR_PERIOD']=='infinity':
+                        error_dialog(self,'NSR period is set to infinity so no NSR stresses will apply. Please uncheck NSR stresses or change NSR period.','Plot Error')
+                    elif not self.sc.get_stresses():
+                        traceback.print_exc()
+                        error_dialog(self, 'Stresses are not defined', 'Plot Error')
+            else:
+                traceback.print_exc()
+                error_dialog(self, e.__class__.__name__ + ': ' + str(e), "Plot Error")
 
     def plot_no_draw(self):
         self.grid = self.sc.get_grid()
@@ -4086,6 +4089,7 @@ class ScalarPlotPanel(PlotPanel):
             if self.lbound != l or self.ubound != u:
                 self.lbound = l
                 self.ubound = u
+                #comment out 'self.save_scale()' next line if you don't want lbound & ubound to change in the config file when a user modifies the values in the program
                 self.save_scale()
                 self.scp.plot_scale(self.scale(), "%.f kPa")
                 self.select_color_range(fl*1000, fu*1000)
@@ -4227,7 +4231,6 @@ class ScalarPlotPanel(PlotPanel):
         lat_min, lat_max = self.consider_obliq_lats(self.grid.lat_min,
                 self.grid.lat_max)
         for self.plot_field in ['tens', 'comp', 'mean', 'diff']:
-            #print self.plot_field
             scalar_grid(
                 stresscalc = self.calc,
                 nlons = self.grid.lon_num,
