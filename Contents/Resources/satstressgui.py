@@ -4895,7 +4895,7 @@ class SatStressFrame(wx.Frame):
 # ===============================================================================
 class SatStressApp(wx.App):
     def OnInit(self):
-        self.frame = SatStressFrame(None, title=u'SatStressGUI V5.0', size=(1085,710))
+        self.frame = SatStressFrame(None, title=u'SatStressGUI V5.1', size=(1085,710))
         self.frame.Show(True)
         self.SetTopWindow(self.frame)
         return True #OnInit should return a boolean value
