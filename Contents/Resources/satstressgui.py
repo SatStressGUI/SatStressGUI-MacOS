@@ -1736,7 +1736,6 @@ class StressListPanel(SatPanel):
     def set_h2NSR(self, evt):
         self.sc.stresses_changed = True
         self.sc.stress_d['Nonsynchronous Rotation'].loveUser.update_h2(fself.parse_complex(evt.GetString()))
-        #traceback.print_exc()
 
     def set_k2NSR(self, evt):
         self.sc.stresses_changed = True
