@@ -1994,7 +1994,7 @@ class PointPanel(SatPanel):
 
     #Add the ability to autopopulate the latitude/longitude/orbital position columns. -ND 2017 
     def onAutopopulate(self, event): 
-        self.autopopulateBox = wx.Dialog(self, -1, "SatStressGUI V5.0")
+        self.autopopulateBox = wx.Dialog(self, -1, "SatStressGUI V6.0")
         vsizer = wx.BoxSizer(wx.VERTICAL) #Master sizer. 
         latitudeSizer = wx.BoxSizer(wx.HORIZONTAL)
         longitudeSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -3004,7 +3004,7 @@ class StressPlotPanel(MatPlotPanel):
                 dialogueBox = wx.MultiChoiceDialog(self, "Would you like to save "+ 
                                                    "the series as photos, a "+
                                                    "video (choose Color or Grayscale), or both?", 
-                                                   "SatStressGUI V5.0",
+                                                   "SatStressGUI V6.0",
                                                    listOfOptions)
                 dialogueBox.CenterOnParent(-1)
                 self.choices = [] 
@@ -3044,7 +3044,7 @@ class StressPlotPanel(MatPlotPanel):
     #UI which allows the user to select a frame rate. 
     def showFrameRate(self):
         self.frameRateBox = wx.Dialog(self, -1, 
-                                      "SatStressGUI V5.0") 
+                                      "SatStressGUI 6.0") 
         vsizer = wx.BoxSizer(wx.VERTICAL) #Master sizer. 
         
         sizer = wx.BoxSizer(wx.HORIZONTAL) #For frame rate selection. 
@@ -4895,7 +4895,7 @@ class SatStressFrame(wx.Frame):
 # ===============================================================================
 class SatStressApp(wx.App):
     def OnInit(self):
-        self.frame = SatStressFrame(None, title=u'SatStressGUI V5.1', size=(1085,710))
+        self.frame = SatStressFrame(None, title=u'SatStressGUI V6.0', size=(1085,710))
         self.frame.Show(True)
         self.SetTopWindow(self.frame)
         return True #OnInit should return a boolean value
