@@ -2075,12 +2075,12 @@ class PointPanel(SatPanel):
         #Create a temporary CSV file with the latitudes/longitudes/orbital positions specified 
         #by the user, call self.load_entries to load that file to the Point Panel, then delete 
         #the temporary CSV file. 
-        latitude = int(self.latitudeTextCtrl.GetValue())
-        longitude = int(self.longitudeTextCtrl.GetValue())
-        start = int(self.orbitalStartTextCtrl.GetValue())
-        end = int(self.orbitalEndTextCtrl.GetValue())
+        latitude = float(self.latitudeTextCtrl.GetValue())
+        longitude = float(self.longitudeTextCtrl.GetValue())
+        start = float(self.orbitalStartTextCtrl.GetValue())
+        end = float(self.orbitalEndTextCtrl.GetValue())
         increment = self.orbitalIncrementSpinCtrl.GetValue()  
-        rowsNeeded = ((end - start)/increment) + 1
+        rowsNeeded = int(((end - start)/increment) + 1)
 
         labels = [['theta [degrees]', 'phi [degrees]', 't [yrs]', 'orbital pos [degrees]', \
         'Stt [kPa]', 'Spt [kPa]', 'Spp [kPa]', 'sigma1 [kPa]', 'sigma3 [kPa]', 'alpha [degrees]']]
